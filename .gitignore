@@ -1,0 +1,23 @@
+# Ignore Python virtual environment
+venv/
+data/
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+
+# Ignore trained models
+models/*.pkl
+
+# Ignore generated submission files
+submissions/*.csv
+
+# Ignore generated output/log files
+output.txt
+error.txt
+gemini.txt
+desc.txt
+notebooks/
+
+# Ignore generated reports/figures
+reports/figures/
