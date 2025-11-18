@@ -10,11 +10,10 @@ from lightgbm import LGBMClassifier
 from sklearn.preprocessing import LabelEncoder
 from src.config import Config
 
-def create_voting_ensemble(models, weights=None):
+def create_voting_ensemble(estimators, weights=None):
     """
-    Creates a VotingClassifier ensemble from a list of trained models.
+    Creates a VotingClassifier ensemble from a list of (name, model) tuples.
     """
-    estimators = [(name, model) for name, model in models.items()]
     voting_clf = VotingClassifier(estimators=estimators, voting='soft', weights=weights, n_jobs=-1)
     return voting_clf
 

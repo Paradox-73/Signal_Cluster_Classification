@@ -18,6 +18,7 @@ class Config:
     # Model parameters
     RANDOM_STATE = 42
     TEST_SIZE = 0.2
+    N_ITER_RANDOM_SEARCH = 200 # Default number of iterations for RandomizedSearchCV
 
     # Hyperparameters for different models
     LOGISTIC_REGRESSION_PARAMS = {
@@ -121,7 +122,7 @@ class Config:
     # Feature Engineering
     USE_POLYNOMIAL_FEATURES = True
     POLYNOMIAL_DEGREE = 2
-
+    USE_ADDITIONAL_ENGINEERED_FEATURES = False # New flag to enable/disable additional engineered features
     # Class Imbalance Techniques
     USE_CLASS_WEIGHTING = True
 

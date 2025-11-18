@@ -8,7 +8,7 @@ from src.config import Config
 from src.data_preprocessing import load_data, preprocess_data, split_data
 from src.train import train_model, evaluate_model
 from src.predict import generate_predictions, create_submission_file
-from src.eda import visualize_decision_boundary
+from src.eda import visualize_model_decision_boundaries
 from sklearn.metrics import f1_score # Added for direct use if needed
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, StratifiedKFold
 from src.ensemble import create_voting_ensemble, create_stacking_ensemble # Added
@@ -81,7 +81,7 @@ def main():
             param_grid = Config.GRADIENT_BOOSTING_GRID
         
         # 4. Train Model
-        model = train_model(X_train, y_train, model_name=model_name, param_grid=param_grid, use_randomized_search=True, n_iter=50)
+        model = train_model(X_train, y_train, model_name=model_name, param_grid=param_grid, use_randomized_search=True)
         trained_models[model_name] = model # Store the trained model
 
         # 5. Evaluate Model
@@ -94,7 +94,7 @@ def main():
         # Only visualize if the number of features is 2 (i.e., no polynomial features applied)
         if X_train.shape[1] == 2:
             print(f"Visualizing decision boundary for {model_name}...")
-            visualize_decision_boundary(model, X_train, y_train, 
+            visualize_model_decision_boundaries(model, X_train, y_train, 
                                         feature_names, class_names, 
                                         title=f'Decision Boundary of {model_name}',
                                         filename=f'decision_boundary_{model_name.lower()}.png')
@@ -137,7 +137,8 @@ def main():
         # For SVC, probability=True must be set in its parameters (already done in config.py)
         
         # Create a base VotingClassifier for GridSearchCV
-        base_voting_clf = create_voting_ensemble(ensemble_models_dict)
+        ensemble_estimators = [(name, model) for name, model in ensemble_models_dict.items()]
+        base_voting_clf = create_voting_ensemble(ensemble_estimators)
 
         print("Performing RandomizedSearchCV for VotingClassifier with 5-fold StratifiedKFold...")
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=Config.RANDOM_STATE)

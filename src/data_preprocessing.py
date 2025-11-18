@@ -2,8 +2,9 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder, PolynomialFeatures # Added PolynomialFeatures
+from sklearn.preprocessing import StandardScaler, LabelEncoder, PolynomialFeatures
 from src.config import Config
+import numpy as np # Import numpy for log/exp transformations
 
 def load_data(train_path=Config.TRAIN_FILE, test_path=Config.TEST_FILE):
     """
@@ -13,14 +14,43 @@ def load_data(train_path=Config.TRAIN_FILE, test_path=Config.TEST_FILE):
     test_df = pd.read_csv(test_path)
     return train_df, test_df
 
-def preprocess_data(train_df, test_df, use_polynomial_features=False, polynomial_degree=2):
+def add_engineered_features(df):
     """
-    Applies preprocessing steps to the data, including feature scaling, optional polynomial feature creation, and target encoding.
+    Adds additional engineered features to the DataFrame.
+    These features include products, ratios, logarithmic, and exponential transformations.
+    """
+    df_copy = df.copy()
+
+    # Product and Ratio Features
+    df_copy['signal_x_response'] = df_copy['signal_strength'] * df_copy['response_level']
+    df_copy['signal_div_response'] = df_copy['signal_strength'] / (df_copy['response_level'] + 1e-6) # Add small epsilon to avoid division by zero
+    df_copy['response_div_signal'] = df_copy['response_level'] / (df_copy['signal_strength'] + 1e-6)
+
+    # Logarithmic Transformations (handle non-positive values)
+    df_copy['log_signal'] = np.log1p(df_copy['signal_strength'] - df_copy['signal_strength'].min() + 1) # log1p for robustness
+    df_copy['log_response'] = np.log1p(df_copy['response_level'] - df_copy['response_level'].min() + 1)
+
+    # Exponential Transformations
+    df_copy['exp_signal'] = np.exp(df_copy['signal_strength'] / 100) # Scaling down for more manageable values
+    df_copy['exp_response'] = np.exp(df_copy['response_level'] / 100)
+
+    print("Added additional engineered features.")
+    return df_copy
+
+def preprocess_data(train_df, test_df, use_polynomial_features=False, polynomial_degree=2, use_additional_engineered_features=False):
+    """
+    Applies preprocessing steps to the data, including feature scaling, optional polynomial feature creation,
+    optional additional engineered features, and target encoding.
     """
     # Separate features and target
     X = train_df[['signal_strength', 'response_level']]
     y = train_df['category']
     X_test = test_df[['signal_strength', 'response_level']]
+
+    # Apply additional engineered features if enabled
+    if use_additional_engineered_features:
+        X = add_engineered_features(X)
+        X_test = add_engineered_features(X_test)
 
     # Feature Scaling
     scaler = StandardScaler()

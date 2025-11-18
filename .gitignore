@@ -17,7 +17,6 @@ output.txt
 error.txt
 gemini.txt
 desc.txt
-notebooks/
 
 # Ignore generated reports/figures
 reports/figures/
