@@ -1,7 +1,7 @@
 # src/config.py
 
 import os
-
+import numpy as np
 class Config:
     # Data paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,13 +49,13 @@ class Config:
         'random_state': RANDOM_STATE,
         'verbose': -1 # Suppress LightGBM output
     }
-    KNN_PARAMS = {
-        'n_neighbors': 5
-    }
     DECISION_TREE_PARAMS = {
         'random_state': RANDOM_STATE
     }
     GAUSSIAN_NAIVE_BAYES_PARAMS = {} # No common parameters for basic usage
+    QDA_PARAMS = {
+        'reg_param': 0.0 # Regularization usually 0.0 to 0.5
+    }
     ADABOOST_PARAMS = {
         'n_estimators': 50,
         'random_state': RANDOM_STATE
@@ -64,12 +64,19 @@ class Config:
         'n_estimators': 100,
         'random_state': RANDOM_STATE
     }
+    # --- NEURAL NETWORK PARAMETERS ---
+    NN_PARAMS = {
+        'epochs': 50,
+        'batch_size': 32,
+        'verbose': 0
+    }
 
     # Hyperparameter Grids for GridSearchCV
     SVC_GRID = {
-        'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-        'kernel': ['rbf', 'linear', 'poly', 'sigmoid'],
-        'gamma': ['scale', 'auto', 0.0001, 0.001, 0.01, 0.1, 1]
+        'C': [0.1, 1, 10, 50, 100, 500, 1000],
+        'kernel': ['rbf', 'poly'], # 'linear' and 'sigmoid' are rarely best for complex clusters
+        'gamma': ['scale', 'auto', 0.01, 0.1, 1, 10],
+        'degree': [2, 3] # Only used if kernel is poly
     }
 
     RANDOM_FOREST_GRID = {
@@ -91,15 +98,14 @@ class Config:
         'num_leaves': [20, 31, 40, 50, 60, 80],
         'verbose': [-1]
     }
-
-    KNN_GRID = {
-        'n_neighbors': [3, 5, 7, 9],
-        'weights': ['uniform', 'distance']
-    }
-
+    
     DECISION_TREE_GRID = {
         'max_depth': [None, 10, 20, 30],
         'min_samples_split': [2, 5, 10]
+    }
+    
+    QDA_GRID = {
+        'reg_param': [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
     }
 
     ADABOOST_GRID = {
@@ -120,11 +126,18 @@ class Config:
     }
 
     # Feature Engineering
-    USE_POLYNOMIAL_FEATURES = True
+    USE_POLYNOMIAL_FEATURES = False
     POLYNOMIAL_DEGREE = 2
     USE_ADDITIONAL_ENGINEERED_FEATURES = False # New flag to enable/disable additional engineered features
     # Class Imbalance Techniques
     USE_CLASS_WEIGHTING = True
+    
+    NN_GRID = {
+        'layer_0_units': [32, 64, 128],
+        'layer_1_units': [16, 32, 64],
+        'layer_0_dropout': [0.2, 0.3, 0.5],
+        'batch_size': [16, 32]
+    }
 
     # VotingClassifier Grid for optimized weights (for top 5 models: SVC, XGB, KNN, LGBM, RF)
     VOTING_CLASSIFIER_GRID = {

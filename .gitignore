@@ -20,3 +20,5 @@ desc.txt
 
 # Ignore generated reports/figures
 reports/figures/
+models/
+o.txt

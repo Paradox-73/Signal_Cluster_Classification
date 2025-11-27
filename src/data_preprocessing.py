@@ -26,6 +26,18 @@ def add_engineered_features(df):
     df_copy['signal_div_response'] = df_copy['signal_strength'] / (df_copy['response_level'] + 1e-6) # Add small epsilon to avoid division by zero
     df_copy['response_div_signal'] = df_copy['response_level'] / (df_copy['signal_strength'] + 1e-6)
 
+    # Coordinate Rotations (The most important fix for Tree Models)
+    # 45-degree rotation helps tree models split diagonal boundaries linearly
+    df_copy['rot_plus'] = df_copy['signal_strength'] + df_copy['response_level']
+    df_copy['rot_minus'] = df_copy['signal_strength'] - df_copy['response_level']
+    
+    # Distance to "Centroids" (K-Means Feature)
+    # This acts as a hint to the classifier about which "blob" the point is near
+    # We estimate 3 centers roughly based on your EDA plots
+    # Group C is roughly at (100, 450), Group B at (150, 450), Group A at (600, 200)
+    # Note: It's safer to use general reference points if you don't run KMeans explicitly
+    df_copy['dist_to_origin'] = np.sqrt(df_copy['signal_strength']**2 + df_copy['response_level']**2)
+
     # Logarithmic Transformations (handle non-positive values)
     df_copy['log_signal'] = np.log1p(df_copy['signal_strength'] - df_copy['signal_strength'].min() + 1) # log1p for robustness
     df_copy['log_response'] = np.log1p(df_copy['response_level'] - df_copy['response_level'].min() + 1)
